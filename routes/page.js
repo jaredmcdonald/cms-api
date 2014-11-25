@@ -9,15 +9,9 @@ module.exports = function (PageModel) {
 
   // GET all pages
   router.get('/', function (req, res) {
-    var query = {}
-    ,   remove = '-__v'
-    if (!authorized(req)) {
-      query.deleted = false
-      query.active = true
-      remove += ' -_id -deleted -active'
-    }
+    var authValues = getAuthHandler({}, req)
 
-    PageModel.find(query, remove).exec(function (err, pages) {
+    PageModel.find(authValues.query, authValues.remove).exec(function (err, pages) {
       if (err) return dbError(res)
 
       sendOk(res, pages)
@@ -26,17 +20,11 @@ module.exports = function (PageModel) {
 
   // GET page
   router.get('/:slug', function (req, res) {
-    var query = {
+    var authValues = getAuthHandler({
       slug : req.params.slug
-    }
-    ,   remove = '-__v'
-    if (!authorized(req)) {
-      query.deleted = false
-      query.active = true
-      remove += ' -_id -deleted -active'
-    }
+    }, req)
 
-    PageModel.findOne(query, remove).exec(function (err, page) {
+    PageModel.findOne(authValues.query, authValues.remove).exec(function (err, page) {
       if (err) return dbError(res)
       if (!page) return notFound(res)
 
@@ -121,6 +109,21 @@ module.exports = function (PageModel) {
 
 function authorized (req) {
   return req.query.authorized === 'true' // still temporary, obviously
+}
+
+function getAuthHandler (defaultQuery, req) {
+  var authValues = {
+    query : defaultQuery,
+    remove : '-__v'
+  }
+
+  if (!authorized(req)) {
+    authValues.query.deleted = false
+    authValues.query.active = true
+    authValues.remove += ' -_id -deleted -active'
+  }
+
+  return authValues
 }
 
 function removeProps (page, props) {
