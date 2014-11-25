@@ -1,4 +1,5 @@
 var router = require('express').Router()
+,   utils = require('../modules/http-utils')
 
 module.exports = function (PageModel) {
 
@@ -12,9 +13,9 @@ module.exports = function (PageModel) {
     var authValues = getAuthHandler({}, req)
 
     PageModel.find(authValues.query, authValues.remove).exec(function (err, pages) {
-      if (err) return dbError(res)
+      if (err) return utils.internalServerError(res)
 
-      sendOk(res, pages)
+      utils.ok(res, pages)
     })
   })
 
@@ -25,45 +26,42 @@ module.exports = function (PageModel) {
     }, req)
 
     PageModel.findOne(authValues.query, authValues.remove).exec(function (err, page) {
-      if (err) return dbError(res)
-      if (!page) return notFound(res)
+      if (err) return utils.internalServerError(res)
+      if (!page) return utils.notFound(res)
 
-      sendOk(res, page)
+      utils.ok(res, page)
     })
   })
 
   // POST new page
   router.post('/', function (req, res) {
-    if (!authorized(req)) return notAuthorized(res)
+    if (!authorized(req)) return utils.notAuthorized(res)
 
     var page = req.body
 
     if (!postValidator(page, res)) return false
 
     slugExists(PageModel, page.slug, res, function (exists) {
-      if (exists) return badRequest(res, 'resource already exists with that slug')
+      if (exists) return utils.badRequest(res, 'resource already exists with that slug')
 
       page.active = !!page.active // guard against 'undefined'
       page.created = page.updated = Date.now()
       page.deleted = false
 
       new PageModel(page).save(function (err, newPage) {
-        if (err) return dbError(res)
-
-        res.status(201).send({
-          status : 'created',
-          statusCode : 201,
-          data : {
-            url : '/page/' + newPage.slug
-          }
+        if (err) return utils.internalServerError(res)
+        
+        utils.created(res, {
+          url : '/page/' + newPage.slug
         })
+      
       })
     })
   })
 
   // DELETE page
   router.delete('/:slug', function (req, res) {
-    if (!authorized(req)) return notAuthorized(res)
+    if (!authorized(req)) return utils.notAuthorized(res)
 
     PageModel.findOneAndUpdate({
       slug : req.params.slug,
@@ -72,16 +70,16 @@ module.exports = function (PageModel) {
       deleted : true,
       updated : Date.now()
     }).exec(function (err, deletedPage) {
-      if (err) return dbError(res)
-      if (!deletedPage) return notFound(res)
+      if (err) return utils.internalServerError(res)
+      if (!deletedPage) return utils.notFound(res)
 
-      res.status(204).end()
+      utils.noContent(res)
     })
   })
 
   // PATCH page
   router.patch('/:slug', function (req, res) {
-    if (!authorized(req)) return notAuthorized(res)
+    if (!authorized(req)) return utils.notAuthorized(res)
 
     var page = req.body
 
@@ -91,10 +89,10 @@ module.exports = function (PageModel) {
     PageModel.findOneAndUpdate({
       slug : req.params.slug
     }, page).exec(function (err, updatedPage) {
-      if (err) return dbError(res)
-      if (!updatedPage) return notFound(res)
+      if (err) return utils.internalServerError(res)
+      if (!updatedPage) return utils.notFound(res)
 
-      res.status(204).end()
+      utils.noContent(res)
     })
   })
 
@@ -138,7 +136,7 @@ function removeProps (page, props) {
 
 function slugExists (model, slug, res, cb) {
   model.count({ slug : slug }).exec(function (err, count) {
-    if (err) return dbError(res)
+    if (err) return utils.internalServerError(res)
 
     cb(count !== 0)
   })
@@ -150,45 +148,10 @@ function postValidator (data, res) {
   })
 
   if (missing.length) {
-    badRequest(res, 'missing fields: ' + missing.join(', '))
+    utils.badRequest(res, 'missing fields: ' + missing.join(', '))
     return false
   }
 
   return true
 }
 
-function sendOk (res, data) {
-  res.status(200).send({
-    status : 'ok',
-    statusCode : 200,
-    data : data
-  })
-}
-
-function badRequest (res, msg) {
-  res.status(400).send({
-    status : 'bad request: ' + msg,
-    statusCode: 400
-  })
-}
-
-function notAuthorized (res) {
-  res.status(401).send({
-    status : 'not authorized',
-    statusCode : 401
-  })
-}
-
-function notFound (res) {
-  res.status(404).send({
-    status : 'not found',
-    statusCode : 404
-  })
-}
-
-function dbError (res) {
-  res.status(500).send({
-    status : 'internal server error',
-    statusCode : 500
-  })
-}
