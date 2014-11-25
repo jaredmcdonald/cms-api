@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
 
 // initialize routes
-app.use('/page', routes.page)
+app.use('/api/v1/page', routes.page)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
