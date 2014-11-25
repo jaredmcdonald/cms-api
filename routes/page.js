@@ -10,12 +10,14 @@ module.exports = function (PageModel) {
   // GET all pages
   router.get('/', function (req, res) {
     var query = {}
+    ,   remove = '-__v'
     if (!authorized(req)) {
       query.deleted = false
       query.active = true
+      remove += ' -_id -deleted -active'
     }
 
-    PageModel.find(query).exec(function (err, pages) {
+    PageModel.find(query, remove).exec(function (err, pages) {
       if (err) return dbError(res)
 
       sendOk(res, pages)
@@ -27,12 +29,14 @@ module.exports = function (PageModel) {
     var query = {
       slug : req.params.slug
     }
+    ,   remove = '-__v'
     if (!authorized(req)) {
       query.deleted = false
       query.active = true
+      remove += ' -_id -deleted -active'
     }
 
-    PageModel.findOne(query).exec(function (err, page) {
+    PageModel.findOne(query, remove).exec(function (err, page) {
       if (err) return dbError(res)
       if (!page) return notFound(res)
 
@@ -116,7 +120,7 @@ module.exports = function (PageModel) {
  */
 
 function authorized (req) {
-  return true // temp
+  return req.query.authorized === 'true' // still temporary, obviously
 }
 
 function removeProps (page, props) {
