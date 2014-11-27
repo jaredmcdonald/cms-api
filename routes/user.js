@@ -71,7 +71,7 @@ module.exports = function (UserModel, password) {
       if (err) return utils.internalServerError(res)
       if (!validatedUser) return utils.notAuthorized(res, 'authentication failed')
 
-      // todo: start session here
+      auth.authorize(req) // begin authorized session
       utils.noContent(res)
     })
   })
