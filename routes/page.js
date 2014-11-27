@@ -1,5 +1,6 @@
 var router = require('express').Router()
 ,   utils = require('../modules/http-utils')
+,   auth = require('../modules/auth')
 
 module.exports = function (PageModel) {
 
@@ -35,14 +36,14 @@ module.exports = function (PageModel) {
 
   // POST new page
   router.post('/', function (req, res) {
-    if (!authorized(req)) return utils.notAuthorized(res)
+    if (!auth.authorized(req)) return utils.notAuthorized(res)
 
     var page = req.body
 
     if (!postValidator(page, res)) return false
 
     slugExists(PageModel, page.slug, res, function (exists) {
-      if (exists) return utils.badRequest(res, 'resource already exists with that slug')
+      if (exists) return utils.badRequest(res, 'page already exists with that slug')
 
       page.active = !!page.active // guard against 'undefined'
       page.created = page.updated = Date.now()
@@ -52,7 +53,7 @@ module.exports = function (PageModel) {
         if (err) return utils.internalServerError(res)
         
         utils.created(res, {
-          url : '/page/' + newPage.slug
+          url : '/api/v1/page/' + newPage.slug
         })
       
       })
@@ -61,7 +62,7 @@ module.exports = function (PageModel) {
 
   // DELETE page
   router.delete('/:slug', function (req, res) {
-    if (!authorized(req)) return utils.notAuthorized(res)
+    if (!auth.authorized(req)) return utils.notAuthorized(res)
 
     PageModel.findOneAndUpdate({
       slug : req.params.slug,
@@ -79,7 +80,7 @@ module.exports = function (PageModel) {
 
   // PATCH page
   router.patch('/:slug', function (req, res) {
-    if (!authorized(req)) return utils.notAuthorized(res)
+    if (!auth.authorized(req)) return utils.notAuthorized(res)
 
     var page = req.body
 
@@ -105,17 +106,13 @@ module.exports = function (PageModel) {
  *
  */
 
-function authorized (req) {
-  return req.query.authorized === 'true' // still temporary, obviously
-}
-
 function getAuthHandler (defaultQuery, req) {
   var authValues = {
     query : defaultQuery,
     remove : '-__v'
   }
 
-  if (!authorized(req)) {
+  if (!auth.authorized(req)) {
     authValues.query.deleted = false
     authValues.query.active = true
     authValues.remove += ' -_id -deleted -active'
@@ -143,9 +140,7 @@ function slugExists (model, slug, res, cb) {
 }
 
 function postValidator (data, res) {
-  var missing = ['slug', 'content', 'title'].filter(function (item) {
-    return !data[item]
-  })
+  var missing = utils.validate(['slug', 'content', 'title'], data)
 
   if (missing.length) {
     utils.badRequest(res, 'missing fields: ' + missing.join(', '))
@@ -154,4 +149,3 @@ function postValidator (data, res) {
 
   return true
 }
-

@@ -25,6 +25,21 @@ function respond (res, status, data) {
   res.send(body)
 }
 
+// check that object `data` has fields in array
+// `required`; return an array of anything in
+// `required` not in `data`
+exports.validate = function (required, data) {
+  return required.filter(function (item) {
+    return !data[item]
+  })
+}
+
+
+/*
+ *  responses
+ *
+ */
+
 // 200 OK
 exports.ok = function (res, data) {
   respond(res, 200, { data : data })
