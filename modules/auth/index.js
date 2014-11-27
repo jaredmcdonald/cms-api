@@ -7,3 +7,7 @@ exports.authorized = function (req) {
 exports.authorize = function (req) {
   req.session.authToken = authToken
 }
+
+exports.logout = function (req) {
+  req.session.destroy()
+}

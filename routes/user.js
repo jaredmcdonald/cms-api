@@ -58,8 +58,8 @@ module.exports = function (UserModel, password) {
     })
   })
 
-  // POST to auth user
-  router.post('/:user/auth', function (req, res) {
+  // POST to auth user (start session)
+  router.post('/login', function (req, res) {
     var user = req.body
 
     if (!postValidator(user, res)) return false
@@ -74,6 +74,14 @@ module.exports = function (UserModel, password) {
       auth.authorize(req) // begin authorized session
       utils.noContent(res)
     })
+  })
+
+  // POST to log out (kill session)
+  router.post('/logout', function (req, res) {
+    if (!auth.authorized(req)) return utils.notAuthorized(res, 'not logged in')
+    
+    auth.logout(req)
+    utils.noContent(res)
   })
 
   // PATCH specific user
