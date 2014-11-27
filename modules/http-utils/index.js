@@ -34,6 +34,25 @@ exports.validate = function (required, data) {
   })
 }
 
+// sanitize object `data` per `strategy`
+// if `strategy` is 'whitelist' (default),
+// return an object with only the fields
+// that are truthy in object `props`; if
+// `strategy` is 'blacklist', then return
+// object with only properties that have
+// falsy (or undefined) values in `props`
+exports.sanitize = function (data, props, strategy) {
+  blacklist = strategy === 'blacklist'
+  var p = Object.create(null)
+  
+  Object.keys(data).forEach(function (key) {
+    if (blacklist ? !props[key] : props[key]) {
+      p[key] = data[key]
+    }
+  })
+  return p
+}
+
 
 /*
  *  responses

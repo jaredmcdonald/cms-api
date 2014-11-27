@@ -84,7 +84,7 @@ module.exports = function (PageModel) {
 
     var page = req.body
 
-    page = removeProps(page, { 'slug' : true }) // don't allow changing of slug
+    page = utils.sanitize(page, { 'slug' : true }, 'blacklist') // don't allow changing of slug
     page.updated = Date.now()
 
     PageModel.findOneAndUpdate({
@@ -119,16 +119,6 @@ function getAuthHandler (defaultQuery, req) {
   }
 
   return authValues
-}
-
-function removeProps (page, props) {
-  var p = Object.create(null)
-  for (var key in page) {
-    if (!props[key]) {
-      p[key] = page[key]
-    }
-  }
-  return p
 }
 
 function slugExists (model, slug, res, cb) {

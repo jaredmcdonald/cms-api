@@ -37,17 +37,14 @@ module.exports = function (UserModel) {
   // POST new user
   router.post('/', function (req, res) {
     if (!auth.authorized(req)) return utils.notAuthorized(res)
+    if (!postValidator(req.body, res)) return false
 
-    var user = req.body
+    var user = hashPassword(req.body)
 
-    if (!postValidator(user, res)) return false
-
-    userExists (UserModel, req.body.username, res, function (exists) {
+    userExists (UserModel, user.username, res, function (exists) {
       if (exists) return utils.badRequest(res, 'user with given username already exists')
 
       user.created = Date.now()
-      user.pw = password.hash(user.password)
-      delete user.password
 
       new UserModel(user).save(function (err, newUser) {
         if (err) return utils.internalServerError(res)
@@ -61,14 +58,11 @@ module.exports = function (UserModel) {
 
   // POST to auth user (start session)
   router.post('/login', function (req, res) {
-    var user = req.body
+    if (!postValidator(req.body, res)) return false
 
-    if (!postValidator(user, res)) return false
+    var user = utils.sanitize(hashPassword(req.body), { username : true, pw : true })
 
-    UserModel.findOne({
-      username : user.username,
-      pw : password.hash(user.password)
-    }).exec(function (err, validatedUser) {
+    UserModel.findOne(user).exec(function (err, validatedUser) {
       if (err) return utils.internalServerError(res)
       if (!validatedUser) return utils.notAuthorized(res, 'authentication failed')
 
@@ -89,7 +83,20 @@ module.exports = function (UserModel) {
   router.patch('/:user', function (req, res) {
     if (!auth.authorized(req)) return utils.notAuthorized(res)
 
-    utils.notImplemented(res)
+    // only allow field 'password' to be PATCHed by username
+    // (updating username if you are accessing the resource
+    //  by username is nonsensical, and updating 'created'
+    //  timestamp should be disallowed)
+    var user = hashPassword(utils.sanitize(req.body, { password : true }))
+
+    UserModel.findOneAndUpdate({
+      username : req.params.user
+    }, user).exec(function (err, updatedUser) {
+      if (err) return utils.internalServerError(res)
+      if (!updatedUser) return utils.notFound(res)
+
+      utils.noContent(res)
+    })
   })
 
   // DELETE specific user
@@ -106,6 +113,18 @@ module.exports = function (UserModel) {
 
   return router
 
+}
+
+// swap field 'password' for encrypted 'pw'
+function hashPassword (user) {
+  // if no 'password' prop, just return `user`
+  if (user.password) {
+    var pw = password.hash(user.password)
+    
+    user = utils.sanitize(user, { password : true }, 'blacklist')
+    user.pw = pw    
+  }
+  return user
 }
 
 function postValidator (data, res) {
