@@ -96,7 +96,12 @@ module.exports = function (UserModel) {
   router.delete('/:user', function (req, res) {
     if (!auth.authorized(req)) return utils.notAuthorized(res)
 
-    utils.notImplemented(res)
+    UserModel.find({ username : req.params.user }).remove().exec(function (err, deletedUser) {
+      if (err) return utils.internalServerError(res)
+      if (!deletedUser) return utils.notFound(res, 'user with supplied username does not exist')
+
+      utils.noContent(res)
+    })
   })
 
   return router
