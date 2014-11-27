@@ -1,8 +1,9 @@
 var router = require('express').Router()
 ,   utils = require('../modules/http-utils')
 ,   auth = require('../modules/auth')
+,   password = require('../modules/password')
 
-module.exports = function (UserModel, password) {
+module.exports = function (UserModel) {
   
   /*
    *  ROUTES
@@ -45,7 +46,7 @@ module.exports = function (UserModel, password) {
       if (exists) return utils.badRequest(res, 'user with given username already exists')
 
       user.created = Date.now()
-      user.pw = password.encrypt(user.password)
+      user.pw = password.hash(user.password)
       delete user.password
 
       new UserModel(user).save(function (err, newUser) {
@@ -66,7 +67,7 @@ module.exports = function (UserModel, password) {
 
     UserModel.findOne({
       username : user.username,
-      pw : password.encrypt(user.password)
+      pw : password.hash(user.password)
     }).exec(function (err, validatedUser) {
       if (err) return utils.internalServerError(res)
       if (!validatedUser) return utils.notAuthorized(res, 'authentication failed')

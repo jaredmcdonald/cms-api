@@ -8,13 +8,6 @@ var express = require('express')
 ,   mongoose = require('mongoose')
 ,   http = require('http')
 
-if (!process.env.ENCRYPTION_KEY || !process.env.ENCRYPTION_ALGO) {
-  console.error('cms-api: missing environment variable $ENCRYPTION_KEY or $ENCRYPTION_ALGO')
-  process.exit(1)
-}
-
-var password = require('./modules/password')(process.env.ENCRYPTION_ALGO, process.env.ENCRYPTION_KEY)
-
 // models
 ,   models = {
       page : require('./models/page')(mongoose),
@@ -24,7 +17,7 @@ var password = require('./modules/password')(process.env.ENCRYPTION_ALGO, proces
 // routes
 ,   routes = {
       page : require('./routes/page')(models.page),
-      user : require('./routes/user')(models.user, password)
+      user : require('./routes/user')(models.user)
       // admin : require('./routes/admin')(models.user),
       // index : require('./routes/index')()
     }
