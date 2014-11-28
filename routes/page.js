@@ -2,7 +2,7 @@ var router = require('express').Router()
 ,   utils = require('../modules/http-utils')
 ,   auth = require('../modules/auth')
 
-module.exports = function (PageModel) {
+module.exports = function (PageModel, basePath) {
 
   /*
    *  ROUTES
@@ -53,7 +53,7 @@ module.exports = function (PageModel) {
         if (err) return utils.internalServerError(res)
         
         utils.created(res, {
-          url : '/api/v1/page/' + newPage.slug
+          url : basePath + '/' + newPage.slug
         })
       
       })

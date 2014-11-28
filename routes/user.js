@@ -3,7 +3,7 @@ var router = require('express').Router()
 ,   auth = require('../modules/auth')
 ,   password = require('../modules/password')
 
-module.exports = function (UserModel) {
+module.exports = function (UserModel, basePath) {
   
   /*
    *  ROUTES
@@ -50,7 +50,7 @@ module.exports = function (UserModel) {
         if (err) return utils.internalServerError(res)
 
         utils.created(res, {
-          url : '/api/v1/user/' + newUser.username
+          url : basePath + '/' + newUser.username
         })
       })
     })

@@ -7,6 +7,7 @@ var express = require('express')
 ,   bodyParser = require('body-parser')
 ,   mongoose = require('mongoose')
 ,   http = require('http')
+,   baseApiPath = '/api/v1'
 
 // models
 ,   models = {
@@ -14,12 +15,16 @@ var express = require('express')
       user : require('./models/user')(mongoose)
     }
 
+// paths for routing
+,   apiPaths = {
+      page : baseApiPath + '/page',
+      user : baseApiPath + '/user'
+    }
+
 // routes
 ,   routes = {
-      page : require('./routes/page')(models.page),
-      user : require('./routes/user')(models.user)
-      // admin : require('./routes/admin')(models.user),
-      // index : require('./routes/index')()
+      page : require('./routes/page')(models.page, apiPaths.page),
+      user : require('./routes/user')(models.user, apiPaths.user)
     }
 
 // app
@@ -41,8 +46,8 @@ app.use(session({
 }))
 
 // initialize routes
-app.use('/api/v1/page', routes.page)
-app.use('/api/v1/user', routes.user)
+app.use(apiPaths.page, routes.page)
+app.use(apiPaths.user, routes.user)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
