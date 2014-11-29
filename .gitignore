@@ -1,5 +1,9 @@
-npm-debug.log
 node_modules
+.sass-cache
 
 # compiled by grunt
 public
+
+# logs
+log
+npm-debug.log

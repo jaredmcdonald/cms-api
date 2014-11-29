@@ -10,6 +10,7 @@ Nothing to do with [homebrew the package manager](http://brew.sh/).
 
 - `grunt` (`npm install -g grunt-cli`)
 - `mongodb` (`brew install mongodb`)
+- `sass` (`brew install sass`)
 
 ### build
 
@@ -20,3 +21,5 @@ install dependencies (`npm install`) and build front-end assets (`grunt`)
 1. start the db: `mongod`
 2. set environment variable `$SECRET` for express cookie secret
 3. start server: `npm start`
+
+starting in development mode, with `supervisor` (required) and `grunt watch`: `npm run-script start-dev` (still need to start `mongod` before)
