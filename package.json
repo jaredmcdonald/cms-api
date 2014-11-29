@@ -1,19 +1,25 @@
 {
-  "name": "cms-api",
+  "name": "homebrew-cms",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "backbone": "^1.1.2",
     "body-parser": "~1.8.1",
     "cookie-parser": "^1.3.3",
     "debug": "~2.0.0",
     "express": "~4.9.0",
     "express-session": "^1.9.2",
     "jade": "^1.6.0",
+    "jquery": "^2.1.1",
     "mongoose": "^3.8.19",
     "morgan": "~1.3.0",
     "serve-favicon": "~2.1.3"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^3.2.1"
   }
 }
