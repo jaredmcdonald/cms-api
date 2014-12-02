@@ -24,6 +24,6 @@ gulp.task('watch-js', function () {
   gulp.watch('./client/js/*.js', [ 'js' ])
 })
 
-gulp.task('watch', [ 'watch-js', 'watch-css' ])
-
 gulp.task('default', [ 'js', 'css' ])
+
+gulp.task('watch', [ 'default', 'watch-js', 'watch-css' ])
