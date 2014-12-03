@@ -16,20 +16,20 @@ gulp.task('css', function () {
   gulp.src(CSS_SRC + '/*.scss')
     .pipe(sourcemaps.init())
     .pipe(sass())
-    .pipe(sourcemaps.write({ sourceRoot: '/sass'}))
+    .pipe(sourcemaps.write({ sourceRoot: '/sass'})) // otherwise it comes out as '/source'
     .pipe(gulp.dest(CSS_DIST))
 })
 
 gulp.task('js', function () {
 
-  return browserify({ debug : true })
-           .add(es6ify.runtime)
-           .transform(es6ify)
-           .require(require.resolve(JS_SRC + '/main.js'), { entry : true })
-           .bundle()
-           .pipe(mold.transformSourcesRelativeTo(JS_DIST))
-           .pipe(source('main.js'))
-           .pipe(gulp.dest(JS_DIST))
+  browserify({ debug : true })
+    .add(es6ify.runtime)
+    .transform(es6ify)
+    .require(require.resolve(JS_SRC + '/main.js'), { entry : true })
+    .bundle()
+    .pipe(mold.transformSourcesRelativeTo(JS_DIST))
+    .pipe(source('main.js'))
+    .pipe(gulp.dest(JS_DIST))
 })
 
 gulp.task('watch-css', function () {
