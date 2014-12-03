@@ -13,15 +13,17 @@
     "express": "~4.9.0",
     "express-session": "^1.9.2",
     "jade": "^1.6.0",
-    "jquery": "^2.1.1",
     "mongoose": "^3.8.19",
     "morgan": "~1.3.0",
     "serve-favicon": "~2.1.3"
   },
   "devDependencies": {
     "browserify": "^6.3.3",
+    "es6ify": "^1.5.1",
     "gulp": "^3.8.10",
     "gulp-sass": "^1.1.0",
+    "gulp-sourcemaps": "^1.2.8",
+    "mold-source-map": "^0.3.0",
     "vinyl-source-stream": "^1.0.0"
   }
 }

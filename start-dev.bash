@@ -8,7 +8,7 @@ ARROW="===>"
 
 # commands to be echoed and executed
 GULP_COMMAND="nohup gulp watch"
-SERVER_COMMAND="nohup supervisor -i public,client bin/www"
+SERVER_COMMAND="nohup supervisor -i public,gulpfile.js bin/www"
 TAIL_COMMAND="tail -f $SERVER_LOG $GULP_LOG"
 
 # ensure logs exist
